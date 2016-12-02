@@ -124,7 +124,7 @@ open class AxisRendererBase: Renderer
         // Normalize interval
         let intervalMagnitude = ChartUtils.roundToNextSignificant(number: pow(10.0, Double(Int(log10(interval)))))
         let intervalSigDigit = Int(interval / intervalMagnitude)
-        if intervalSigDigit > 5
+        if intervalSigDigit > 5 && (!axis.granularityEnabled || interval > axis.granularity)
         {
             // Use one order of magnitude higher, to avoid intervals like 0.9 or 90
             interval = floor(10.0 * Double(intervalMagnitude))
