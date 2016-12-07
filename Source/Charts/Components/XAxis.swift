@@ -44,8 +44,12 @@ open class XAxis: AxisBase
     open var avoidFirstLastClippingEnabled = false
     
     /// the position of the x-labels relative to the chart
-    open var labelPosition = LabelPosition.top
-    
+	open var labelPosition = LabelPosition.top
+	
+	/// how the text inside the label should be aligned. The label itself is centered, but if the label has multiple
+	/// lines the individual lines will be aligned differently.
+	open var labelAlignment = NSTextAlignment.center
+	
     /// if set to true, word wrapping the labels will be enabled.
     /// word wrapping is done using `(value width * labelRotatedWidth)`
     ///
