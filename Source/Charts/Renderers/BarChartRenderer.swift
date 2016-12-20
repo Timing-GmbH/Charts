@@ -396,14 +396,19 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 let phaseY = animator.phaseY
         
                 // if only single values are drawn (sum)
-                if !dataSet.isStacked
-                {
+                if !dataSet.isStacked || dataSet.onlyDrawStackSums
+				{
+					var bufferIndex = 0
+					
                     for j in 0 ..< Int(ceil(Double(dataSet.entryCount) * animator.phaseX))
                     {
                         guard let e = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
-                        
-                        let rect = buffer.rects[j]
-                        
+						
+						let vals = e.yValues
+						let valuesForCurrentEntry = vals == nil ? 1 : vals!.count
+						let rect = buffer.rects[bufferIndex + valuesForCurrentEntry - 1]
+						bufferIndex += valuesForCurrentEntry
+						
                         let x = rect.origin.x + rect.size.width / 2.0
                         
                         if !viewPortHandler.isInBoundsRight(x)

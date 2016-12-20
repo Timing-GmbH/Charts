@@ -125,6 +125,8 @@ open class BarChartDataSet: BarLineScatterCandleBubbleChartDataSet, IBarChartDat
     {
         return _stackSize > 1 ? true : false
     }
+	
+	open var onlyDrawStackSums = false
     
     /// - returns: The overall entry count, including counting each stack-value individually
     open var entryCountStacks: Int
