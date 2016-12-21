@@ -28,6 +28,8 @@ open class RealmBarDataSet: RealmBarLineScatterCandleBubbleDataSet, IBarChartDat
     {
         super.init()
     }
+	
+	public var onlyDrawStackSums: Bool { return false }
     
     public override init(results: RLMResults<RLMObject>?, xValueField: String?, yValueField: String, label: String?)
     {
