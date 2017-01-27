@@ -233,6 +233,8 @@ open class ChartUtils
     /// - returns: An angle between 0.0 < 360.0 (not less than zero, less than 360)
     internal class func normalizedAngleFromAngle(_ angle: CGFloat) -> CGFloat
     {
+		if angle.isInfinite { return 0 }
+		
         var angle = angle
         
         while (angle < 0.0)
