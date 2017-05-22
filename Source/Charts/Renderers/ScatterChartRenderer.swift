@@ -136,6 +136,8 @@ open class ScatterChartRenderer: LineScatterCandleRadarRenderer
                 let trans = dataProvider.getTransformer(forAxis: dataSet.axisDependency)
                 let valueToPixelMatrix = trans.valueToPixelMatrix
                 
+                let iconsOffset = dataSet.iconsOffset
+                
                 let shapeSize = dataSet.scatterShapeSize
                 let lineHeight = valueFont.lineHeight
                 
@@ -167,7 +169,8 @@ open class ScatterChartRenderer: LineScatterCandleRadarRenderer
                         dataSetIndex: i,
                         viewPortHandler: viewPortHandler)
                     
-                    if dataSet.isDrawValuesEnabled {
+                    if dataSet.isDrawValuesEnabled
+                    {
                         ChartUtils.drawText(
                             context: context,
                             text: text,
@@ -179,12 +182,13 @@ open class ScatterChartRenderer: LineScatterCandleRadarRenderer
                         )
                     }
                     
-                    if let icon = e.data as? NSUIImage, dataSet.isDrawIconsEnabled {
+                    if let icon = e.icon, dataSet.isDrawIconsEnabled
+                    {
                         ChartUtils.drawImage(context: context,
                                              image: icon,
-                                             point: pt,
-                                             expectedSize: icon.size,
-                                             offset: dataSet.iconsOffset)
+                                             x: pt.x + iconsOffset.x,
+                                             y: pt.y + iconsOffset.y,
+                                             size: icon.size)
                     }
                 }
             }

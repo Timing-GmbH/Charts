@@ -24,12 +24,12 @@ class BarChartTests: FBSnapshotTestCase
         
         for (i, value) in values.enumerated()
         {
-            entries.append(BarChartDataEntry(x: Double(i), y: value, data: UIImage(named: "icon", in: Bundle(for: self.classForCoder), compatibleWith: nil)))
+            entries.append(BarChartDataEntry(x: Double(i), y: value, icon: UIImage(named: "icon", in: Bundle(for: self.classForCoder), compatibleWith: nil)))
         }
         
         dataSet = BarChartDataSet(values: entries, label: "Bar chart unit test data")
         dataSet.drawIconsEnabled = false
-        dataSet.iconsOffset = CGSize(width: 0, height: -10.0)
+        dataSet.iconsOffset = CGPoint(x: 0, y: -10.0)
 
         let data = BarChartData(dataSet: dataSet)
         data.barWidth = 0.85

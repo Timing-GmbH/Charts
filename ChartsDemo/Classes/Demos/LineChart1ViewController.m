@@ -138,7 +138,7 @@
     for (int i = 0; i < count; i++)
     {
         double val = arc4random_uniform(range) + 3;
-        [values addObject:[[ChartDataEntry alloc] initWithX:i y:val data: [UIImage imageNamed:@"icon"]]];
+        [values addObject:[[ChartDataEntry alloc] initWithX:i y:val icon: [UIImage imageNamed:@"icon"]]];
     }
     
     LineChartDataSet *set1 = nil;
@@ -152,6 +152,8 @@
     else
     {
         set1 = [[LineChartDataSet alloc] initWithValues:values label:@"DataSet 1"];
+        
+        set1.drawIconsEnabled = NO;
         
         set1.lineDashLengths = @[@5.f, @2.5f];
         set1.highlightLineDashLengths = @[@5.f, @2.5f];

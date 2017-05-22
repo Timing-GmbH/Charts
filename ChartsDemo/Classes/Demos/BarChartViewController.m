@@ -138,9 +138,9 @@
         double mult = (range + 1);
         double val = (double) (arc4random_uniform(mult));
         if (arc4random_uniform(100) < 25) {
-            [yVals addObject:[[BarChartDataEntry alloc] initWithX:val y:i data: [UIImage imageNamed:@"icon"]]];
+            [yVals addObject:[[BarChartDataEntry alloc] initWithX:i y:val icon: [UIImage imageNamed:@"icon"]]];
         } else {
-            [yVals addObject:[[BarChartDataEntry alloc] initWithX:val y:i]];
+            [yVals addObject:[[BarChartDataEntry alloc] initWithX:i y:val]];
         }
     }
     
@@ -156,6 +156,7 @@
     {
         set1 = [[BarChartDataSet alloc] initWithValues:yVals label:@"The year 2017"];
         [set1 setColors:ChartColorTemplates.material];
+        set1.drawIconsEnabled = NO;
         
         NSMutableArray *dataSets = [[NSMutableArray alloc] init];
         [dataSets addObject:set1];

@@ -132,13 +132,18 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 var negY = -e.negativeSum
                 var yStart = 0.0
                 
-                
                 // fill the stack
                 for k in 0 ..< vals!.count
                 {
                     let value = vals![k]
                     
-                    if value >= 0.0
+                    if value == 0.0 && (posY == 0.0 || negY == 0.0)
+                    {
+                        // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
+                        y = value
+                        yStart = y
+                    }
+                    else if value >= 0.0
                     {
                         y = posY
                         yStart = posY + value
@@ -394,6 +399,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 let trans = dataProvider.getTransformer(forAxis: dataSet.axisDependency)
                 
                 let phaseY = animator.phaseY
+                
+                let iconsOffset = dataSet.iconsOffset
         
                 // if only single values are drawn (sum)
                 if !dataSet.isStacked || dataSet.onlyDrawStackSums
@@ -424,7 +431,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                         
                         let val = e.y
                         
-                        if dataSet.isDrawValuesEnabled {
+                        if dataSet.isDrawValuesEnabled
+                        {
                             drawValue(
                                 context: context,
                                 value: formatter.stringForValue(
@@ -441,14 +449,22 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                                 color: dataSet.valueTextColorAt(j))
                         }
                         
-                        if dataSet.isDrawIconsEnabled {
-                            drawIcon(context: context,
-                                 icon: e.data as? NSUIImage,
-                                 xPos: x,
-                                 yPos: val >= 0.0
-                                    ? (rect.origin.y + posOffset)
-                                    : (rect.origin.y + rect.size.height + negOffset),
-                                 offset: dataSet.iconsOffset)
+                        if let icon = e.icon, dataSet.isDrawIconsEnabled
+                        {
+                            var px = x
+                            var py = val >= 0.0
+                                ? (rect.origin.y + posOffset)
+                                : (rect.origin.y + rect.size.height + negOffset)
+                            
+                            px += iconsOffset.x
+                            py += iconsOffset.y
+                            
+                            ChartUtils.drawImage(
+                                context: context,
+                                image: icon,
+                                x: px,
+                                y: py,
+                                size: icon.size)
                         }
                     }
                 }
@@ -482,7 +498,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                                 continue
                             }
                             
-                            if dataSet.isDrawValuesEnabled {
+                            if dataSet.isDrawValuesEnabled
+                            {
                                 drawValue(
                                     context: context,
                                     value: formatter.stringForValue(
@@ -498,13 +515,21 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                                     color: dataSet.valueTextColorAt(index))
                             }
                             
-                            if dataSet.isDrawIconsEnabled {
-                                drawIcon(context: context,
-                                         icon: e.data as? NSUIImage,
-                                         xPos: x,
-                                         yPos: rect.origin.y +
-                                            (e.y >= 0 ? posOffset : negOffset),
-                                         offset: dataSet.iconsOffset)
+                            if let icon = e.icon, dataSet.isDrawIconsEnabled
+                            {
+                                var px = x
+                                var py = rect.origin.y +
+                                    (e.y >= 0 ? posOffset : negOffset)
+                                
+                                px += iconsOffset.x
+                                py += iconsOffset.y
+                                
+                                ChartUtils.drawImage(
+                                    context: context,
+                                    image: icon,
+                                    x: px,
+                                    y: py,
+                                    size: icon.size)
                             }
                         }
                         else
@@ -522,7 +547,12 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                                 let value = vals[k]
                                 var y: Double
                                 
-                                if value >= 0.0
+                                if value == 0.0 && (posY == 0.0 || negY == 0.0)
+                                {
+                                    // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
+                                    y = value
+                                }
+                                else if value >= 0.0
                                 {
                                     posY += value
                                     y = posY
@@ -540,7 +570,9 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                             
                             for k in 0 ..< transformed.count
                             {
-                                let y = transformed[k].y + (vals[k] >= 0 ? posOffset : negOffset)
+                                let val = vals[k]
+                                let drawBelow = (val == 0.0 && negY == 0.0 && posY > 0.0) || val < 0.0
+                                let y = transformed[k].y + (drawBelow ? negOffset : posOffset)
                                 
                                 if !viewPortHandler.isInBoundsRight(x)
                                 {
@@ -552,7 +584,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                                     continue
                                 }
                                 
-                                if dataSet.isDrawValuesEnabled {
+                                if dataSet.isDrawValuesEnabled
+                                {
                                     drawValue(
                                         context: context,
                                         value: formatter.stringForValue(
@@ -567,12 +600,14 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                                         color: dataSet.valueTextColorAt(index))
                                 }
                                 
-                                if dataSet.isDrawIconsEnabled {
-                                    drawIcon(context: context,
-                                             icon: e.data as? NSUIImage,
-                                             xPos: x,
-                                             yPos: y,
-                                             offset: dataSet.iconsOffset)
+                                if let icon = e.icon, dataSet.isDrawIconsEnabled
+                                {
+                                    ChartUtils.drawImage(
+                                        context: context,
+                                        image: icon,
+                                        x: x + iconsOffset.x,
+                                        y: y + iconsOffset.y,
+                                        size: icon.size)
                                 }
                             }
                         }
@@ -588,15 +623,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
     open func drawValue(context: CGContext, value: String, xPos: CGFloat, yPos: CGFloat, font: NSUIFont, align: NSTextAlignment, color: NSUIColor)
     {
         ChartUtils.drawText(context: context, text: value, point: CGPoint(x: xPos, y: yPos), align: align, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: color])
-    }
-    
-    /// Draws a value at the specified x and y position.
-    open func drawIcon(context: CGContext, icon: NSUIImage?, xPos: CGFloat, yPos: CGFloat, offset: CGSize)
-    {
-        let point = CGPoint(x: xPos, y: yPos)
-        if let iconImage = icon {
-            ChartUtils.drawImage(context: context, image: iconImage, point: point, expectedSize: iconImage.size, offset: offset)
-        }
     }
     
     open override func drawExtras(context: CGContext)

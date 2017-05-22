@@ -168,6 +168,8 @@ open class RadarChartRenderer: LineRadarRenderer
             
             let entryCount = dataSet.entryCount
             
+            let iconsOffset = dataSet.iconsOffset
+            
             for j in 0 ..< entryCount
             {
                 guard let e = dataSet.entryForIndex(j) else { continue }
@@ -181,7 +183,8 @@ open class RadarChartRenderer: LineRadarRenderer
                 
                 guard let formatter = dataSet.valueFormatter else { continue }
                 
-                if dataSet.isDrawValuesEnabled {
+                if dataSet.isDrawValuesEnabled
+                {
                     ChartUtils.drawText(
                         context: context,
                         text: formatter.stringForValue(
@@ -196,19 +199,20 @@ open class RadarChartRenderer: LineRadarRenderer
                     )
                 }
                 
-                if let icon = e.data as? NSUIImage, dataSet.isDrawIconsEnabled {
-                    let pIcon = ChartUtils.getPosition(
+                if let icon = e.icon, dataSet.isDrawIconsEnabled
+                {
+                    var pIcon = ChartUtils.getPosition(
                         center: center,
-                        dist: CGFloat(e.y) * factor * CGFloat(phaseY) + dataSet.iconsOffset.height,
+                        dist: CGFloat(e.y) * factor * CGFloat(phaseY) + iconsOffset.y,
                         angle: sliceangle * CGFloat(j) * CGFloat(phaseX) + chart.rotationAngle)
+                    pIcon.y += iconsOffset.x
                     
                     ChartUtils.drawImage(context: context,
                                          image: icon,
-                                         point: pIcon,
-                                         expectedSize: icon.size,
-                                         offset: CGSize(width: 0, height: 0))
+                                         x: pIcon.x,
+                                         y: pIcon.y,
+                                         size: icon.size)
                 }
-
             }
         }
     }

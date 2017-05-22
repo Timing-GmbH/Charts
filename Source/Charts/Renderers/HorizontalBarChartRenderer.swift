@@ -134,7 +134,13 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 {
                     let value = vals![k]
                     
-                    if value >= 0.0
+                    if value == 0.0 && (posY == 0.0 || negY == 0.0)
+                    {
+                        // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
+                        y = value
+                        yStart = y
+                    }
+                    else if value >= 0.0
                     {
                         y = posY
                         yStart = posY + value
@@ -337,6 +343,8 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 
                 let phaseY = animator.phaseY
                 
+                let iconsOffset = dataSet.iconsOffset
+                
                 let buffer = _buffers[dataSetIndex]
                 
                 // if only single values are drawn (sum)
@@ -383,7 +391,8 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                             negOffset = -negOffset - valueTextWidth
                         }
                         
-                        if dataSet.isDrawValuesEnabled {
+                        if dataSet.isDrawValuesEnabled
+                        {
                             drawValue(
                                 context: context,
                                 value: valueText,
@@ -395,13 +404,21 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                 color: dataSet.valueTextColorAt(j))
                         }
                         
-                        if dataSet.isDrawIconsEnabled {
-                            drawIcon(context: context,
-                                     icon: e.data as? NSUIImage,
-                                     xPos: (rect.origin.x + rect.size.width)
-                                        + (val >= 0.0 ? posOffset : negOffset),
-                                     yPos: y,
-                                     offset: dataSet.iconsOffset)
+                        if let icon = e.icon, dataSet.isDrawIconsEnabled
+                        {
+                            var px = (rect.origin.x + rect.size.width)
+                                + (val >= 0.0 ? posOffset : negOffset)
+                            var py = y
+                            
+                            px += iconsOffset.x
+                            py += iconsOffset.y
+                            
+                            ChartUtils.drawImage(
+                                context: context,
+                                image: icon,
+                                x: px,
+                                y: py,
+                                size: icon.size)
                         }
                     }
                 }
@@ -455,7 +472,8 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                 negOffset = -negOffset - valueTextWidth
                             }
                             
-                            if dataSet.isDrawValuesEnabled {
+                            if dataSet.isDrawValuesEnabled
+                            {
                                 drawValue(
                                     context: context,
                                     value: valueText,
@@ -467,13 +485,21 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                     color: dataSet.valueTextColorAt(index))
                             }
                             
-                            if dataSet.isDrawIconsEnabled {
-                                drawIcon(context: context,
-                                         icon: e.data as? NSUIImage,
-                                         xPos: (rect.origin.x + rect.size.width)
-                                            + (val >= 0.0 ? posOffset : negOffset),
-                                         yPos: rect.origin.y,
-                                         offset: dataSet.iconsOffset)
+                            if let icon = e.icon, dataSet.isDrawIconsEnabled
+                            {
+                                var px = (rect.origin.x + rect.size.width)
+                                    + (val >= 0.0 ? posOffset : negOffset)
+                                var py = rect.origin.y
+                                
+                                px += iconsOffset.x
+                                py += iconsOffset.y
+                                
+                                ChartUtils.drawImage(
+                                    context: context,
+                                    image: icon,
+                                    x: px,
+                                    y: py,
+                                    size: icon.size)
                             }
                         }
                         else
@@ -489,7 +515,12 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                 let value = vals[k]
                                 var y: Double
                                 
-                                if value >= 0.0
+                                if value == 0.0 && (posY == 0.0 || negY == 0.0)
+                                {
+                                    // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
+                                    y = value
+                                }
+                                else if value >= 0.0
                                 {
                                     posY += value
                                     y = posY
@@ -525,7 +556,9 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                     negOffset = -negOffset - valueTextWidth
                                 }
                                 
-                                let x = transformed[k].x + (val >= 0 ? posOffset : negOffset)
+                                let drawBelow = (val == 0.0 && negY == 0.0 && posY > 0.0) || val < 0.0
+
+                                let x = transformed[k].x + (drawBelow ? negOffset : posOffset)
                                 let y = rect.origin.y + rect.size.height / 2.0
                                 
                                 if (!viewPortHandler.isInBoundsTop(y))
@@ -543,7 +576,8 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                     continue
                                 }
                                 
-                                if dataSet.isDrawValuesEnabled {
+                                if dataSet.isDrawValuesEnabled
+                                {
                                     drawValue(context: context,
                                         value: valueText,
                                         xPos: x,
@@ -553,12 +587,14 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                         color: dataSet.valueTextColorAt(index))
                                 }
                                 
-                                if dataSet.isDrawIconsEnabled {
-                                    drawIcon(context: context,
-                                             icon: e.data as? NSUIImage,
-                                             xPos: x,
-                                             yPos: y,
-                                             offset: dataSet.iconsOffset)
+                                if let icon = e.icon, dataSet.isDrawIconsEnabled
+                                {
+                                    ChartUtils.drawImage(
+                                        context: context,
+                                        image: icon,
+                                        x: x + iconsOffset.x,
+                                        y: y + iconsOffset.y,
+                                        size: icon.size)
                                 }
                             }
                         }
