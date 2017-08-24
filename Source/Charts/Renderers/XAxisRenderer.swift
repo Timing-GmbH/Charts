@@ -246,7 +246,7 @@ open class XAxisRenderer: AxisRendererBase
                     else if i == 0
                     { // avoid clipping of the first
                         let width = labelns.boundingRect(with: labelMaxSize, options: .usesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
-                        position.x += width / 2.0
+                        position.x = max(position.x, width / 2.0)
                     }
                 }
                 
