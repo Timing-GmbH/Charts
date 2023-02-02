@@ -267,7 +267,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         accessibilityOrderedElements = accessibilityCreateEmptyOrderedElements()
 
         // Make the chart header the first element in the accessible elements array
-        if let chart = dataProvider as? BarChartView {
+        if isAccessibilityEnabled(),
+            let chart = dataProvider as? BarChartView {
             let element = createAccessibleHeader(usingChart: chart,
                                                  andData: barData,
                                                  withDefaultDescription: "Bar Chart")
@@ -287,8 +288,10 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         }
 
         // Merge nested ordered arrays into the single accessibleChartElements.
-        accessibleChartElements.append(contentsOf: accessibilityOrderedElements.flatMap { $0 } )
-        accessibilityPostLayoutChangedNotification()
+        if isAccessibilityEnabled() {
+            accessibleChartElements.append(contentsOf: accessibilityOrderedElements.flatMap { $0 } )
+            accessibilityPostLayoutChangedNotification()
+        }
     }
 
     private var _barShadowRectBuffer: CGRect = CGRect()
@@ -390,7 +393,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             }
 
             // Create and append the corresponding accessibility element to accessibilityOrderedElements
-            if let chart = dataProvider as? BarChartView
+            if isAccessibilityEnabled(),
+                let chart = dataProvider as? BarChartView
             {
                 let element = createAccessibleElement(
                     withIndex: j,
@@ -765,7 +769,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
     /// This is marked internal to support HorizontalBarChartRenderer as well.
     internal func accessibilityCreateEmptyOrderedElements() -> [[NSUIAccessibilityElement]]
     {
-        guard let chart = dataProvider as? BarChartView else { return [] }
+        guard isAccessibilityEnabled(), let chart = dataProvider as? BarChartView else { return [] }
 
         // Unlike Bubble & Line charts, here we use the maximum entry count to account for stacked bars
         let maxEntryCount = chart.data?.maxEntryCountSet?.entryCount ?? 0

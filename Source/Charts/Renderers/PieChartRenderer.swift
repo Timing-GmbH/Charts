@@ -150,12 +150,14 @@ open class PieChartRenderer: NSObject, DataRenderer
         let prefix: String = chart.data?.accessibilityEntryLabelPrefix ?? "Element"
         let description = chart.chartDescription.text ?? dataSet.label ?? chart.centerText ??  "Pie Chart"
 
-        let
-        element = NSUIAccessibilityElement(accessibilityContainer: chart)
-        element.accessibilityLabel = description + ". \(entryCount) \(prefix + (entryCount == 1 ? "" : "s"))"
-        element.accessibilityFrame = chart.bounds
-        element.isHeader = true
-        accessibleChartElements.append(element)
+        let accessibilityEnabled = isAccessibilityEnabled()
+        if accessibilityEnabled {
+            let element = NSUIAccessibilityElement(accessibilityContainer: chart)
+            element.accessibilityLabel = description + ". \(entryCount) \(prefix + (entryCount == 1 ? "" : "s"))"
+            element.accessibilityFrame = chart.bounds
+            element.isHeader = true
+            accessibleChartElements.append(element)
+        }
 
         for j in 0 ..< entryCount
         {
@@ -278,18 +280,22 @@ open class PieChartRenderer: NSObject, DataRenderer
             context.addPath(path)
             context.fillPath(using: .evenOdd)
 
-            let axElement = createAccessibleElement(withIndex: j,
-                                                    container: chart,
-                                                    dataSet: dataSet)
-            { (element) in
-                element.accessibilityFrame = path.boundingBoxOfPath
-            }
+            if accessibilityEnabled {
+                let axElement = createAccessibleElement(withIndex: j,
+                                                        container: chart,
+                                                        dataSet: dataSet)
+                { (element) in
+                    element.accessibilityFrame = path.boundingBoxOfPath
+                }
 
-            accessibleChartElements.append(axElement)
+                accessibleChartElements.append(axElement)
+            }
         }
 
-        // Post this notification to let VoiceOver account for the redrawn frames
-        accessibilityPostLayoutChangedNotification()
+        if accessibilityEnabled {
+            // Post this notification to let VoiceOver account for the redrawn frames
+            accessibilityPostLayoutChangedNotification()
+        }
 
         context.restoreGState()
     }
@@ -722,6 +728,7 @@ open class PieChartRenderer: NSObject, DataRenderer
         // Append highlighted accessibility slices into this array, so we can prioritize them over unselected slices
         var highlightedAccessibleElements: [NSUIAccessibilityElement] = []
 
+        let accessibilityEnabled = isAccessibilityEnabled()
         for hightlight in highlights
         {
             // get the index to highlight
@@ -868,20 +875,22 @@ open class PieChartRenderer: NSObject, DataRenderer
             context.addPath(path)
             context.fillPath(using: .evenOdd)
 
-            let axElement = createAccessibleElement(withIndex: index,
-                                                    container: chart,
-                                                    dataSet: set)
-            { (element) in
-                element.accessibilityFrame = path.boundingBoxOfPath
-                element.isSelected = true
-            }
+            if accessibilityEnabled {
+                let axElement = createAccessibleElement(withIndex: index,
+                                                        container: chart,
+                                                        dataSet: set)
+                { (element) in
+                    element.accessibilityFrame = path.boundingBoxOfPath
+                    element.isSelected = true
+                }
 
-            highlightedAccessibleElements.append(axElement)
+                highlightedAccessibleElements.append(axElement)
+            }
         }
 
         // Prepend selected slices before the already rendered unselected ones.
         // NOTE: - This relies on drawDataSet() being called before drawHighlighted in PieChartView.
-        if !accessibleChartElements.isEmpty {
+        if accessibilityEnabled && !accessibleChartElements.isEmpty {
             accessibleChartElements.insert(contentsOf: highlightedAccessibleElements, at: 1)
         }
 
