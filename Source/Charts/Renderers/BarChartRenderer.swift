@@ -481,7 +481,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 let iconsOffset = dataSet.iconsOffset
         
                 // if only single values are drawn (sum)
-				if !dataSet.isStacked || dataSet.onlyDrawStackSums
+                if !dataSet.isStacked || dataSet.onlyDrawStackSums
                 {
 					var bufferIndex = 0
 
