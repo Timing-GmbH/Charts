@@ -238,9 +238,13 @@ open class YAxisRenderer: NSObject, AxisRenderer
         {
             context.setLineDash(phase: 0.0, lengths: [])
         }
-        
-        context.move(to: CGPoint(x: viewPortHandler.contentLeft, y: pos.y))
-        context.addLine(to: CGPoint(x: viewPortHandler.contentRight, y: pos.y))
+
+		// Adjust the y offset to ensure that the line does not cross pixel boundaries.
+		//! TODO: It would be nice to adjust by a half-point on 2x displays instead, but I don't think we can get the
+		//  current backing scale factor in this method.
+		let adjustedYOffset = floor(pos.y) - self.axis.zeroLineWidth / 2.0
+        context.move(to: CGPoint(x: viewPortHandler.contentLeft, y: adjustedYOffset))
+        context.addLine(to: CGPoint(x: viewPortHandler.contentRight, y: adjustedYOffset))
         context.drawPath(using: CGPathDrawingMode.stroke)
     }
     

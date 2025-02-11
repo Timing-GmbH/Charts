@@ -250,7 +250,7 @@ open class XAxisRenderer: NSObject, AxisRenderer
         guard let transformer = self.transformer else { return }
         
         let paraStyle = ParagraphStyle.default.mutableCopy() as! MutableParagraphStyle
-        paraStyle.alignment = .center
+        paraStyle.alignment = self.axis.labelAlignment
         
         let labelAttrs: [NSAttributedString.Key : Any] = [.font: axis.labelFont,
                                                          .foregroundColor: axis.labelTextColor,
@@ -297,7 +297,7 @@ open class XAxisRenderer: NSObject, AxisRenderer
                 else if i == 0
                 { // avoid clipping of the first
                     let width = labelns.boundingRect(with: labelMaxSize, options: .usesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
-                    position.x += width / 2.0
+                    position.x = max(position.x, width / 2.0)
                 }
             }
             

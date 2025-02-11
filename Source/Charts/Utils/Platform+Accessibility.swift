@@ -14,6 +14,11 @@ import Foundation
 #if os(iOS) || os(tvOS)
 import UIKit
 
+internal func isAccessibilityEnabled() -> Bool {
+    return true
+}
+
+
 internal func accessibilityPostLayoutChangedNotification(withElement element: Any? = nil)
 {
     UIAccessibility.post(notification: .layoutChanged, argument: element)
@@ -103,6 +108,10 @@ extension NSUIView
 
 #if os(OSX)
 import AppKit
+
+internal func isAccessibilityEnabled() -> Bool {
+    return NSWorkspace.shared.isVoiceOverEnabled || UserDefaults.standard.bool(forKey: "Charts_forceAccessibilityEnabled")
+}
 
 
 internal func accessibilityPostLayoutChangedNotification(withElement element: Any? = nil)
