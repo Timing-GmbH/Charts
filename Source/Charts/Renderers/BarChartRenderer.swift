@@ -114,13 +114,14 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 // fill the stack
                 for value in vals
                 {
-                    if value == 0.0 && (posY == 0.0 || negY == 0.0)
+					// Temporary fix for TR-598.
+					/*if value == 0.0 && (posY == 0.0 || negY == 0.0)
                     {
                         // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
                         y = value
                         yStart = y
                     }
-                    else if value >= 0.0
+                    else */if value >= 0.0
                     {
                         y = posY
                         yStart = posY + value
@@ -266,7 +267,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         accessibilityOrderedElements = accessibilityCreateEmptyOrderedElements()
 
         // Make the chart header the first element in the accessible elements array
-        if let chart = dataProvider as? BarChartView {
+        if isAccessibilityEnabled(),
+            let chart = dataProvider as? BarChartView {
             let element = createAccessibleHeader(usingChart: chart,
                                                  andData: barData,
                                                  withDefaultDescription: "Bar Chart")
@@ -286,8 +288,10 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         }
 
         // Merge nested ordered arrays into the single accessibleChartElements.
-        accessibleChartElements.append(contentsOf: accessibilityOrderedElements.flatMap { $0 } )
-        accessibilityPostLayoutChangedNotification()
+        if isAccessibilityEnabled() {
+            accessibleChartElements.append(contentsOf: accessibilityOrderedElements.flatMap { $0 } )
+            accessibilityPostLayoutChangedNotification()
+        }
     }
 
     private var _barShadowRectBuffer: CGRect = CGRect()
@@ -389,7 +393,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             }
 
             // Create and append the corresponding accessibility element to accessibilityOrderedElements
-            if let chart = dataProvider as? BarChartView
+            if isAccessibilityEnabled(),
+                let chart = dataProvider as? BarChartView
             {
                 let element = createAccessibleElement(
                     withIndex: j,
@@ -476,14 +481,19 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 let iconsOffset = dataSet.iconsOffset
         
                 // if only single values are drawn (sum)
-                if !dataSet.isStacked
+				if !dataSet.isStacked || dataSet.onlyDrawStackSums
                 {
+					var bufferIndex = 0
+
                     let range = 0 ..< Int(ceil(Double(dataSet.entryCount) * animator.phaseX))
                     for j in range
                     {
                         guard let e = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
                         
-                        let rect = buffer[j]
+						let vals = e.yValues
+						let valuesForCurrentEntry = vals == nil ? 1 : vals!.count
+						let rect = buffer[bufferIndex + valuesForCurrentEntry - 1]
+						bufferIndex += valuesForCurrentEntry
                         
                         let x = rect.origin.x + rect.size.width / 2.0
                         
@@ -759,7 +769,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
     /// This is marked internal to support HorizontalBarChartRenderer as well.
     internal func accessibilityCreateEmptyOrderedElements() -> [[NSUIAccessibilityElement]]
     {
-        guard let chart = dataProvider as? BarChartView else { return [] }
+        guard isAccessibilityEnabled(), let chart = dataProvider as? BarChartView else { return [] }
 
         // Unlike Bubble & Line charts, here we use the maximum entry count to account for stacked bars
         let maxEntryCount = chart.data?.maxEntryCountSet?.entryCount ?? 0

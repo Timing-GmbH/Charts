@@ -125,6 +125,11 @@ extension CGContext
         drawOffset.x = center.x - (size.width / 2)
         drawOffset.y = center.y - (size.height / 2)
 
+		// Round the offset to the nearest screen pixel, for sharper image drawing.
+		let screenScale = self.ctm.a
+		drawOffset.x = round(drawOffset.x * screenScale) / screenScale
+		drawOffset.y = round(drawOffset.y * screenScale) / screenScale
+
         NSUIGraphicsPushContext(self)
 
         if image.size.width != size.width && image.size.height != size.height
