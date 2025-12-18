@@ -9,7 +9,7 @@
 //  https://github.com/ChartsOrg/Charts
 //
 
-import Foundation
+import AppKit
 import CoreGraphics
 
 @objc(ChartXAxis)
@@ -42,14 +42,14 @@ open class XAxis: AxisBase
 
     /// if set to true, the chart will avoid that the first and last label entry in the chart "clip" off the edge of the chart
     @objc open var avoidFirstLastClippingEnabled = false
-    
+
     /// the position of the x-labels relative to the chart
-	@objc open var labelPosition = LabelPosition.top
-	
-	/// how the text inside the label should be aligned. The label itself is centered, but if the label has multiple
-	/// lines the individual lines will be aligned differently.
-	@objc open var labelAlignment = NSTextAlignment.center
-	
+    @objc open var labelPosition = LabelPosition.top
+
+    /// how the text inside the label should be aligned. The label itself is centered, but if the label has multiple
+    /// lines the individual lines will be aligned differently.
+    @objc open var labelAlignment = NSTextAlignment.center
+
     /// if set to true, word wrapping the labels will be enabled.
     /// word wrapping is done using `(value width * labelRotatedWidth)`
     ///
