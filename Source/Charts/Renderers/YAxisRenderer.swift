@@ -238,7 +238,7 @@ open class YAxisRenderer: NSObject, AxisRenderer
         {
             context.setLineDash(phase: 0.0, lengths: [])
         }
-
+      
 		// Adjust the y offset to ensure that the line does not cross pixel boundaries.
 		//! TODO: It would be nice to adjust by a half-point on 2x displays instead, but I don't think we can get the
 		//  current backing scale factor in this method.
@@ -395,7 +395,7 @@ open class YAxisRenderer: NSObject, AxisRenderer
         // Normalize interval
         let intervalMagnitude = pow(10.0, Double(Int(log10(interval)))).roundedToNextSignificant()
         let intervalSigDigit = Int(interval / intervalMagnitude)
-        if intervalSigDigit > 5
+        if intervalSigDigit > 5 && (!axis.granularityEnabled || interval > axis.granularity)
         {
             // Use one order of magnitude higher, to avoid intervals like 0.9 or 90
             interval = floor(10.0 * Double(intervalMagnitude))
